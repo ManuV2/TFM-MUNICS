@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocChain — Acceso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --blue-50:  #EAF1FB;
+      --blue-500: #1A5EB8;
+      --blue-700: #0D3D7A;
+      --blue-900: #071F3E;
+      --gray-100: #EAECEE;
+      --gray-200: #D2D6DB;
+      --gray-400: #8C95A0;
+      --gray-600: #4E5A66;
+      --gray-800: #252D35;
+      --gray-900: #111619;
+      --green-600:#1E7D3C;
+      --red-600:  #A8281F;
+      --font: 'IBM Plex Sans', system-ui, sans-serif;
+      --mono: 'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--blue-900);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+    }
+
+    .login-header {
+      background: var(--blue-900);
+      padding: 32px 32px 28px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .login-logo {
+      width: 52px; height: 52px;
+      background: var(--blue-500);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 24px; color: #fff;
+    }
+    .login-title { font-size: 20px; font-weight: 600; color: #fff; }
+    .login-sub   { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+
+    .login-body { padding: 28px 32px 32px; }
+
+    .login-label {
+      font-size: 12px; font-weight: 600;
+      color: var(--gray-600);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    /* Lista de usuarios */
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .user-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #fff;
+    }
+    .user-option:hover { border-color: var(--blue-500); background: var(--blue-50); }
+    .user-option.selected {
+      border-color: var(--blue-500);
+      background: var(--blue-50);
+      box-shadow: 0 0 0 3px rgba(26,94,184,0.15);
+    }
+
+    .user-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--blue-500);
+      color: #fff;
+      font-size: 14px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-display { font-size: 14px; font-weight: 500; color: var(--gray-900); }
+    .user-msp     { font-family: var(--mono); font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+    .user-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-200);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: transparent;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .user-option.selected .user-check {
+      background: var(--blue-500);
+      border-color: var(--blue-500);
+      color: #fff;
+    }
+
+    /* Estado de carga */
+    .loading-users {
+      text-align: center;
+      padding: 32px;
+      color: var(--gray-400);
+      font-size: 13px;
+    }
+    .loading-users i { font-size: 24px; display: block; margin-bottom: 10px; }
+
+    /* Error */
+    .error-msg {
+      background: #fcecea;
+      border: 1px solid #f0bbb8;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--red-600);
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .error-msg.show { display: flex; }
+
+    /* Botón */
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: var(--blue-500);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+    .btn-login:hover:not(:disabled) { background: var(--blue-700); }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .login-footer {
+      padding: 16px 32px;
+      border-top: 1px solid var(--gray-100);
+      text-align: center;
+      font-size: 11px;
+      color: var(--gray-400);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .login-footer i { color: var(--green-600); }
+
+    /* Scrollbar */
+    .user-list::-webkit-scrollbar { width: 4px; }
+    .user-list::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo"><i class="fa-solid fa-scale-balanced"></i></div>
+      <div class="login-title">DocChain</div>
+      <div class="login-sub">Registro oficial de documentos en blockchain</div>
+    </div>
+
+    <div class="login-body">
+      <span class="login-label">Selecciona tu identidad</span>
+
+      <div class="user-list" id="user-list">
+        <div class="loading-users">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+          Leyendo identidades...
+        </div>
+      </div>
+
+      <div class="error-msg" id="error-msg">
+        <i class="fa-solid fa-circle-xmark"></i>
+        <span id="error-text"></span>
+      </div>
+
+      <button class="btn-login" id="btn-login" disabled>
+        <i class="fa-solid fa-right-to-bracket"></i>
+        Acceder
+      </button>
+    </div>
+
+    <div class="login-footer">
+      <i class="fa-solid fa-lock"></i>
+      Conexión firmada con certificado X.509 · Hyperledger Fabric
+    </div>
+  </div>
+
+  <script>
+    let selectedUserId = null;
+
+    // Cargar usuarios al arrancar
+    async function loadUsers() {
+      try {
+        const res   = await fetch('/api/auth/users');
+        const users = await res.json();
+
+        if (!users.length) {
+          document.getElementById('user-list').innerHTML = `
+            <div class="loading-users">
+              <i class="fa-regular fa-folder-open"></i>
+              No se encontraron identidades en crypto-config
+            </div>`;
+          return;
+        }
+
+        document.getElementById('user-list').innerHTML = users.map(u => `
+          <div class="user-option" data-id="${u.id}" onclick="selectUser(this, '${u.id}')">
+            <div class="user-avatar">${u.initials}</div>
+            <div class="user-info">
+              <div class="user-display">${u.displayName}</div>
+              <div class="user-msp">${u.mspId}</div>
+            </div>
+            <div class="user-check"><i class="fa-solid fa-check"></i></div>
+          </div>
+        `).join('');
+
+      } catch (e) {
+        document.getElementById('user-list').innerHTML = `
+          <div class="loading-users">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Error al conectar con el servidor
+          </div>`;
+      }
+    }
+
+    function selectUser(el, userId) {
+      document.querySelectorAll('.user-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedUserId = userId;
+      document.getElementById('btn-login').disabled = false;
+      hideError();
+    }
+
+    function showError(msg) {
+      const err = document.getElementById('error-msg');
+      document.getElementById('error-text').textContent = msg;
+      err.classList.add('show');
+    }
+    function hideError() {
+      document.getElementById('error-msg').classList.remove('show');
+    }
+
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      if (!selectedUserId) return;
+      hideError();
+
+      const btn = document.getElementById('btn-login');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Conectando con Fabric...';
+
+      try {
+        const res  = await fetch('/api/auth/login', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ userId: selectedUserId })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || 'Error al iniciar sesión');
+
+        // Redirigir a la app principal
+        window.location.href = '/';
+
+      } catch (e) {
+        showError(e.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Acceder';
+      }
+    });
+
+    loadUsers();
+  </script>
+
+</body>
+</html>

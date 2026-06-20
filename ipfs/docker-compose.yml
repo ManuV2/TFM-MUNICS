@@ -1,0 +1,12 @@
+services:
+  ipfs:
+    image: ipfs/kubo:latest
+    container_name: ipfs_node
+    ports:
+      - "4001:4001"          # Comunicación P2P (Swarm)
+      - "127.0.0.1:5001:5001" # Consola de administración (API)
+      - "127.0.0.1:8080:8080" # Gateway de archivos (Lectura)
+    volumes:
+      - ./data/ipfs:/data/ipfs
+      - ./data/staging:/export
+    restart: unless-stopped

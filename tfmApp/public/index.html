@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocChain — Registro oficial de documentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL (nuevo envío / historial)
+  ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title"><i class="fa-solid fa-paper-plane"></i> Nuevo envío de documento</h2>
+        <button class="modal-close" id="modal-close" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       LAYOUT PRINCIPAL
+  ═══════════════════════════════════════════════════════ -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div>
+          <div class="brand-name">DocChain</div>
+          <div class="brand-sub">Registro oficial</div>
+        </div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn-compose" id="btn-new-shipment">
+          <i class="fa-solid fa-plus"></i> Nuevo envío
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Bandeja</span>
+        <a class="nav-item active" data-view="inbox" href="#">
+          <i class="fa-solid fa-inbox"></i>
+          <span>Recibidos</span>
+          <span class="nav-badge" id="badge-inbox"></span>
+        </a>
+        <a class="nav-item" data-view="sent" href="#">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>Enviados</span>
+        </a>
+        <a class="nav-item" data-view="all" href="#">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Todos</span>
+        </a>
+
+        <span class="nav-section-label" style="margin-top:1.5rem;">Trazabilidad</span>
+        <a class="nav-item" data-view="audit" href="#">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Auditoría</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar-sidebar"></div>
+        <div class="user-info">
+          <div class="user-name" id="user-name-sidebar"></div>
+          <div class="user-org"  id="user-org-sidebar"></div>
+        </div>
+        <button class="btn-icon" id="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- PANEL CENTRAL: LISTA -->
+    <main class="list-panel">
+      <div class="list-toolbar">
+        <h1 class="list-title" id="list-title">Recibidos</h1>
+        <div class="toolbar-right">
+          <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input
+              type="search"
+              class="search-input"
+              id="search-input"
+              placeholder="Buscar por descripción, fichero..."
+              autocomplete="off"
+            >
+          </div>
+          <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="PENDING">Pendientes</button>
+            <button class="filter-btn" data-filter="READ">Leídos</button>
+            <button class="filter-btn" data-filter="CONFIRMED">Confirmados</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="shipment-list" id="shipment-list"></div>
+    </main>
+
+    <!-- PANEL DERECHO: DETALLE -->
+    <aside class="detail-panel" id="detail-panel">
+      <div class="detail-empty" id="detail-empty">
+        <i class="fa-regular fa-file-lines"></i>
+        <p>Selecciona un envío<br>para ver los detalles</p>
+      </div>
+
+      <div class="detail-content" id="detail-content" hidden>
+        <div class="detail-header">
+          <div class="detail-subject" id="d-subject"></div>
+          <div class="detail-meta-grid">
+            <span class="meta-label">De</span>     <span class="meta-value" id="d-from"></span>
+            <span class="meta-label">Para</span>    <span class="meta-value" id="d-to"></span>
+            <span class="meta-label">Enviado</span> <span class="meta-value" id="d-date"></span>
+            <span class="meta-label">Estado</span>  <span class="meta-value" id="d-status-badge"></span>
+          </div>
+        </div>
+        <div class="detail-body" id="d-body"></div>
+        <div class="detail-footer" id="d-footer"></div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

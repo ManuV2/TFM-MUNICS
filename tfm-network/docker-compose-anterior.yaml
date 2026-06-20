@@ -1,0 +1,153 @@
+version: '3.8'
+
+services:
+
+  # =========================
+  # ORDERER
+  # =========================
+  orderer.example.com:
+    container_name: orderer.example.com
+    image: hyperledger/fabric-orderer:2.5
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+#     - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/system-genesis-block/genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+    volumes:
+      - ./organizations/orderer/orderer.example.com:/var/hyperledger/orderer
+      - ./system-genesis-block/genesis.block:/var/hyperledger/system-genesis-block/genesis.block
+    ports:
+      - 7050:7050
+
+  # =========================
+  # CAs
+  # =========================
+  ca_ministerio:
+    container_name: ca_ministerio
+    image: hyperledger/fabric-ca:1.5
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=MinisterioDeJusticiaCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+    ports:
+      - 7054:7054
+    volumes:
+      - ./organizations/ministerioDeJusticia:/etc/hyperledger/fabric-ca-server
+
+  ca_cgpj:
+    container_name: ca_cgpj
+    image: hyperledger/fabric-ca:1.5
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=CGPJCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+    ports:
+      - 8054:8054
+    volumes:
+      - ./organizations/cgpj:/etc/hyperledger/fabric-ca-server
+
+  ca_fiscalia:
+    container_name: ca_fiscalia
+    image: hyperledger/fabric-ca:1.5
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=FiscaliaCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+    ports:
+      - 9054:9054
+    volumes:
+      - ./organizations/fiscalia:/etc/hyperledger/fabric-ca-server
+
+  ca_abogados:
+    container_name: ca_abogados
+    image: hyperledger/fabric-ca:1.5
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=AbogadosYProcuradoresCA
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+    ports:
+      - 10054:10054
+    volumes:
+      - ./organizations/abogadosYprocuradores:/etc/hyperledger/fabric-ca-server
+
+  # =========================
+  # PEERS
+  # =========================
+  peer0_ministerio:
+    container_name: peer0_ministerio
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      - CORE_PEER_ID=peer0.ministerio.example.com
+      - CORE_PEER_ADDRESS=peer0.ministerio.example.com:7051
+      - CORE_PEER_LOCALMSPID=MinisterioDeJusticiaMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer0/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/peer0/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/peer0/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/peer0/tls/tlscacerts/tls-localhost-7054.pem
+    extra_hosts:
+      - "peer0.ministerio.example.com:127.0.0.1"
+    ports:
+      - 7051:7051
+    volumes:
+      - ./organizations/ministerioDeJusticia/peer0:/etc/hyperledger/peer0
+
+  peer0_cgpj:
+    container_name: peer0_cgpj
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      - CORE_PEER_ID=peer0.cgpj.example.com
+      - CORE_PEER_ADDRESS=peer0.cgpj.example.com:8051
+      - CORE_PEER_LOCALMSPID=CGPJMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer0/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/peer0/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/peer0/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/peer0/tls/tlscacerts/tls-localhost-8054.pem
+    extra_hosts:
+      - "peer0.cgpj.example.com:127.0.0.1"
+    ports:
+      - 8051:8051
+    volumes:
+      - ./organizations/cgpj/peer0:/etc/hyperledger/peer0
+
+  peer0_fiscalia:
+    container_name: peer0_fiscalia
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      - CORE_PEER_ID=peer0.fiscalia.example.com
+      - CORE_PEER_ADDRESS=peer0.fiscalia.example.com:9051
+      - CORE_PEER_LOCALMSPID=FiscaliaMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer0/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/peer0/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/peer0/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/peer0/tls/tlscacerts/tls-localhost-9054.pem
+    extra_hosts:
+      - "peer0.fiscalia.example.com:127.0.0.1"
+    ports:
+      - 9051:9051
+    volumes:
+      - ./organizations/fiscalia/peer0:/etc/hyperledger/peer0
+
+  peer0_abogados:
+    container_name: peer0_abogados
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      - CORE_PEER_ID=peer0.abogadosYProcuradores.example.com
+      - CORE_PEER_ADDRESS=peer0.abogadosYProcuradores.example.com:10051
+      - CORE_PEER_LOCALMSPID=AbogadosYProcuradoresMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer0/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/peer0/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/peer0/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/peer0/tls/tlscacerts/tls-localhost-10054.pem
+    extra_hosts:
+      - "peer0.abogadosYProcuradores.example.com:127.0.0.1"
+    ports:
+      - 10051:10051
+    volumes:
+      - ./organizations/abogadosYprocuradores/peer0:/etc/hyperledger/peer0

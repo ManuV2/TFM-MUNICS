@@ -1,0 +1,299 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+services:
+  # =========================
+  # ORDERER
+  # =========================  
+  orderer.tfm.com:
+    container_name: orderer.tfm.com
+    image: hyperledger/fabric-orderer:2.5.15
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/tfm.com/orderers/orderer.tfm.com/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/tfm.com/orderers/orderer.tfm.com/tls/:/var/hyperledger/orderer/tls
+    ports:
+      - 7050:7050
+  # =========================
+  # CAs
+  # =========================
+  ca_ministerio:
+    image: hyperledger/fabric-ca:1.5.17
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-ministerio
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.ministerio.tfm.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/d8e20cd33301def6529379c1770a1e47aad68e9871e11237111bb5d4ca4455a6_sk
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.ministerio.tfm.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/d8e20cd33301def6529379c1770a1e47aad68e9871e11237111bb5d4ca4455a6_sk -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/ministerio.tfm.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerMinisterio
+
+  ca_cgpj:
+    image: hyperledger/fabric-ca:1.5.17
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-cgpj
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.cgpj.tfm.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/d25a24154d325ab7eb4bc9dd9206811da590a463fa5c0f22d3d652bb8cc5d216_sk
+    ports:
+      - "8054:8054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.cgpj.tfm.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/d25a24154d325ab7eb4bc9dd9206811da590a463fa5c0f22d3d652bb8cc5d216_sk -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/cgpj.tfm.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerCGPJ
+
+  ca_fiscalia:
+    image: hyperledger/fabric-ca:1.5.17
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-fiscalia
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.fiscalia.tfm.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/6125b527cef6a86c9920f386eaa8996cf54e7c7368e0ad3a21a2f2e40441fa93_sk
+    ports:
+      - "9054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.fiscalia.tfm.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/6125b527cef6a86c9920f386eaa8996cf54e7c7368e0ad3a21a2f2e40441fa93_sk -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/fiscalia.tfm.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerFiscalia
+
+  ca_abogados:
+    image: hyperledger/fabric-ca:1.5.17
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-abogados
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.abogados.tfm.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/2f61381e47b68bb65318692551bb821a0a5b42e002e919d239da02d8d69f3fe7_sk
+    ports:
+      - "10054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.abogados.tfm.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/2f61381e47b68bb65318692551bb821a0a5b42e002e919d239da02d8d69f3fe7_sk -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/abogados.tfm.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca_peerAbogados
+  # =========================
+  # PEERS
+  # =========================
+  peer0.ministerio.tfm.com:
+    container_name: peer0.ministerio.tfm.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.ministerio.tfm.com
+      - CORE_PEER_ADDRESS=peer0.ministerio.tfm.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.ministerio.tfm.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.ministerio.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=MinisterioMSP
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/ministerio.tfm.com/peers/peer0.ministerio.tfm.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/ministerio.tfm.com/peers/peer0.ministerio.tfm.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 7051:7051
+      - 7052:7052
+      - 7053:7053
+
+  peer1.ministerio.tfm.com:
+    container_name: peer1.ministerio.tfm.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.ministerio.tfm.com
+      - CORE_PEER_ADDRESS=peer1.ministerio.tfm.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer1.ministerio.tfm.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.ministerio.tfm.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.ministerio.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=MinisterioMSP
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/ministerio.tfm.com/peers/peer1.ministerio.tfm.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/ministerio.tfm.com/peers/peer1.ministerio.tfm.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 8051:7051
+      - 8052:7052
+      - 8053:7053
+
+  peer0.cgpj.tfm.com:
+    container_name: peer0.cgpj.tfm.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.cgpj.tfm.com
+      - CORE_PEER_ADDRESS=peer0.cgpj.tfm.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.cgpj.tfm.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.cgpj.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=CGPJMSP
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/cgpj.tfm.com/peers/peer0.cgpj.tfm.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/cgpj.tfm.com/peers/peer0.cgpj.tfm.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 9051:7051
+      - 9052:7052
+      - 9053:7053
+
+  peer1.cgpj.tfm.com:
+    container_name: peer1.cgpj.tfm.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.cgpj.tfm.com
+      - CORE_PEER_ADDRESS=peer1.cgpj.tfm.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer1.cgpj.tfm.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.cgpj.tfm.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.cgpj.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=CGPJMSP
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/cgpj.tfm.com/peers/peer1.cgpj.tfm.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/cgpj.tfm.com/peers/peer1.cgpj.tfm.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 10051:7051
+      - 10052:7052
+      - 10053:7053
+
+  peer0.fiscalia.tfm.com:
+    container_name: peer0.fiscalia.tfm.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.fiscalia.tfm.com
+      - CORE_PEER_ADDRESS=peer0.fiscalia.tfm.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.fiscalia.tfm.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.fiscalia.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=FiscaliaMSP
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/fiscalia.tfm.com/peers/peer0.fiscalia.tfm.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/fiscalia.tfm.com/peers/peer0.fiscalia.tfm.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 11051:7051
+      - 11052:7052
+      - 11053:7053
+
+  peer1.fiscalia.tfm.com:
+    container_name: peer1.fiscalia.tfm.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.fiscalia.tfm.com
+      - CORE_PEER_ADDRESS=peer1.fiscalia.tfm.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer1.fiscalia.tfm.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.fiscalia.tfm.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.fiscalia.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=FiscaliaMSP
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/fiscalia.tfm.com/peers/peer1.fiscalia.tfm.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/fiscalia.tfm.com/peers/peer1.fiscalia.tfm.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 12051:7051
+      - 12052:7052
+      - 12053:7053
+
+  peer0.abogados.tfm.com:
+    container_name: peer0.abogados.tfm.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.abogados.tfm.com
+      - CORE_PEER_ADDRESS=peer0.abogados.tfm.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.abogados.tfm.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.abogados.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=AbogadosMSP
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/abogados.tfm.com/peers/peer0.abogados.tfm.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/abogados.tfm.com/peers/peer0.abogados.tfm.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 13051:7051
+      - 13052:7052
+      - 13053:7053
+
+  peer1.abogados.tfm.com:
+    container_name: peer1.abogados.tfm.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.abogados.tfm.com
+      - CORE_PEER_ADDRESS=peer1.abogados.tfm.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer1.abogados.tfm.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.abogados.tfm.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.abogados.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=AbogadosMSP
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/abogados.tfm.com/peers/peer1.abogados.tfm.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/abogados.tfm.com/peers/peer1.abogados.tfm.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - 14051:7051
+      - 14052:7052
+      - 14053:7053
+
+  # =========================
+  # CLI
+  # =========================
+
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:2.5.15
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.ministerio.tfm.com:7051
+      - CORE_PEER_LOCALMSPID=MinisterioMSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/ministerio.tfm.com/peers/peer0.ministerio.tfm.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/ministerio.tfm.com/peers/peer0.ministerio.tfm.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/ministerio.tfm.com/peers/peer0.ministerio.tfm.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/ministerio.tfm.com/users/Admin@ministerio.tfm.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    #command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; sleep $TIMEOUT'
+    volumes:
+      - /var/run/:/host/var/run/
+      - $GOPATH/src/github.com/hlf-go/example-chaincodes/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go
+      - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+      - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+      - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - orderer.tfm.com
+      - peer0.ministerio.tfm.com
+      - peer1.ministerio.tfm.com
+      - peer0.cgpj.tfm.com
+      - peer1.cgpj.tfm.com
+      - peer0.fiscalia.tfm.com
+      - peer1.fiscalia.tfm.com
+      - peer0.abogados.tfm.com
+      - peer1.abogados.tfm.com
